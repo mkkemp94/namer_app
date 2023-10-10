@@ -1,8 +1,7 @@
 import 'package:flutter/material.dart';
-import 'package:english_words/english_words.dart';
+import 'package:namer_app/pages/favoritespage.dart';
 import 'package:namer_app/pages/generatorpage.dart';
 
-import 'favoritespage.dart';
 
 class MyHomePage extends StatefulWidget {
   @override
@@ -14,6 +13,7 @@ class _MyHomePageState extends State<MyHomePage> {
 
   @override
   Widget build(BuildContext context) {
+    var colorScheme = Theme.of(context).colorScheme;
 
     Widget page;
     switch (selectedIndex) {
@@ -27,40 +27,64 @@ class _MyHomePageState extends State<MyHomePage> {
         throw UnimplementedError("No widget for $selectedIndex");
     }
 
-    return LayoutBuilder(
-      builder: (context, constraints) {
-        return Scaffold(
-          body: Row(
-            children: [
+    // Container for current page for background and animation
+    var mainArea = ColoredBox(
+      color: colorScheme.secondary,
+      child: AnimatedSwitcher(
+        duration: Duration(milliseconds: 250),
+        child: page,
+      ),
+    );
 
-              SafeArea(
-                child: NavigationRail(
-                  extended: constraints.maxWidth >= 600,
-                  destinations: [
-                    NavigationRailDestination(icon: Icon(Icons.home), label: Text("Home")),
-                    NavigationRailDestination(icon: Icon(Icons.favorite), label: Text("Favorites")),
-                  ],
-                  selectedIndex: selectedIndex,
-                  onDestinationSelected: (value) {
-                    setState(() {
-                      selectedIndex = value;
-                    });
-                  },
-                ),
+    return Scaffold(body: LayoutBuilder(builder: (context, constraints) {
+      if (constraints.maxWidth < 450) {
+        // Small screen
+        return Column(
+          children: [
+            Expanded(child: mainArea),
+            SafeArea(
+              child: BottomNavigationBar(
+                items: [
+                  BottomNavigationBarItem(
+                      icon: Icon(Icons.home), label: "Home"),
+                  BottomNavigationBarItem(
+                      icon: Icon(Icons.favorite), label: "Favorites")
+                ],
+                currentIndex: selectedIndex,
+                onTap: (value) {
+                  setState(() {
+                    selectedIndex = value;
+                  });
+                },
               ),
-
-              Expanded(child: Container(color: Theme.of(context).colorScheme.secondary, child: page))
-
-            ],
-          ),
+            ),
+          ],
+        );
+      } else {
+        // Large screen
+        return Row(
+          children: [
+            SafeArea(
+              child: NavigationRail(
+                extended: constraints.maxWidth >= 600,
+                destinations: [
+                  NavigationRailDestination(
+                      icon: Icon(Icons.home), label: Text("Home")),
+                  NavigationRailDestination(
+                      icon: Icon(Icons.favorite), label: Text("Favorites")),
+                ],
+                selectedIndex: selectedIndex,
+                onDestinationSelected: (value) {
+                  setState(() {
+                    selectedIndex = value;
+                  });
+                },
+              ),
+            ),
+            Expanded(child: mainArea),
+          ],
         );
       }
-    );
+    }));
   }
 }
-
-
-
-
-
-
